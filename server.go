@@ -83,7 +83,7 @@ func (server *Server) serveCodec(cc codec.Codec) {
 		req, err := server.readRequest(cc)
 		if err != nil {
 
-			if req != nil {
+			if req == nil {
 				break //it's not possible to recover, so close the connection
 			}
 			req.h.Error = err.Error()
@@ -138,10 +138,10 @@ func (server *Server) sendResponse(cc codec.Codec, h *codec.Header,
 		log.Println("rpc server: write response error:", err)
 	}
 }
-func (server *Server) handleRequest(cc codec.Codec, req *request, 
+func (server *Server) handleRequest(cc codec.Codec, req *request,
 	sending *sync.Mutex, wg *sync.WaitGroup) {
 	// TODO, should call registered rpc methods to get the right replyv
-	// day 1, just print argv and send a hello message 
+	// day 1, just print argv and send a hello message
 	defer wg.Done()
 	log.Println(req.h, req.argv.Elem())
 	req.replyv = reflect.ValueOf(fmt.Sprintf("Grpc resp %d", req.h.Seq))
