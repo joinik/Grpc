@@ -41,3 +41,19 @@ Option固定在报文的最开始，Header和Body可以有多个，即报文
 > - handleRequest使用了协程并发执行请求
 > - 处理请求是并发的，但是回复是必须是逐个发送的，并发容易导致多个回复报文交织在一起，客户端无法解析。这里使用锁（sending）保证。
 > - 尽力而为，只有在header解析失败时，才终止循环
+
+## day2
+
+### call设计
+
+- the method’s type is exported.
+- the method is exported.
+- the method has two arguments, both exported (or builtin) types.
+- the method’s second argument is a pointer.
+- the method has return type error.
+
+例如：
+
+````js
+func (t *T) MethodName(argType T1, replyType *T2) error
+````

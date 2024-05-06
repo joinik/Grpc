@@ -12,7 +12,7 @@ import (
 
 func startServer(addr chan string) {
 	// pick a free port
-	l, err := net.Listen("tcp", ":0")
+	l, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		log.Fatal("netword error: ", err)
 	}
@@ -21,12 +21,12 @@ func startServer(addr chan string) {
 	Grpc.Accept(l)
 }
 
-func main()  {
+func main() {
 	addr := make(chan string)
 	go startServer(addr)
 
 	conn, _ := net.Dial("tcp", <-addr)
-	defer func() {_ = conn.Close()}()
+	defer func() { _ = conn.Close() }()
 
 	time.Sleep(time.Second)
 	// send options
@@ -36,11 +36,11 @@ func main()  {
 	for i := 0; i < 5; i++ {
 		h := &codec.Header{
 			SericeMethod: "Foo.Sum",
-			Seq: uint64(i),
+			Seq:          uint64(i),
 		}
 		_ = cc.Write(h, fmt.Sprintf("Grpc req %d", h.Seq))
 		_ = cc.ReadHeader(h)
-		var reply string 
+		var reply string
 		_ = cc.ReadBody((&reply))
 		log.Println("reply:", reply)
 	}
