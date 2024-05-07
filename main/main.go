@@ -2,11 +2,10 @@ package main
 
 import (
 	"Grpc"
-	"Grpc/codec"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -22,26 +21,29 @@ func startServer(addr chan string) {
 }
 
 func main() {
+	log.SetFlags(0)
 	addr := make(chan string)
 	go startServer(addr)
 
-	conn, _ := net.Dial("tcp", <-addr)
-	defer func() { _ = conn.Close() }()
+	client, _ := Grpc.Dial("tcp", <-addr)
+	defer func() { _ = client.Close() }()
 
 	time.Sleep(time.Second)
-	// send options
-	_ = json.NewEncoder(conn).Encode(Grpc.DefaultOption)
-	cc := codec.NewGobCodec(conn)
+	// send request & reveive response
+	var wg sync.WaitGroup
+
 	// send request & receive response
 	for i := 0; i < 5; i++ {
-		h := &codec.Header{
-			SericeMethod: "Foo.Sum",
-			Seq:          uint64(i),
-		}
-		_ = cc.Write(h, fmt.Sprintf("Grpc req %d", h.Seq))
-		_ = cc.ReadHeader(h)
-		var reply string
-		_ = cc.ReadBody((&reply))
-		log.Println("reply:", reply)
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			args := fmt.Sprintf("Grpc req %d", i)
+			var reply string
+			if err := client.Call("Foo.Sum", args, &reply); err != nil {
+				log.Fatal("call Foo.Sum error", err)
+			}
+			log.Println("reply:", reply)
+		}(i)
+		wg.Wait()
 	}
 }
