@@ -164,3 +164,42 @@ func NewClientCodec(cc codec.Codec, opt *Option) *Client {
 	go client.receive()
 	return client
 }
+
+func parseOptions(opts ...*Option) (*Option, error) {
+	// if opts is nil or pass nil as parameter
+	if len(opts) == 0 || opts[0] == nil {
+		return DefaultOption, nil
+	}
+
+	if len(opts) != 1 {
+		return nil, errors.New("number of options is more than 1")
+	}
+	opt := opts[0]
+	opt.MagicNumber = DefaultOption.MagicNumber
+	if opt.CodecType == "" {
+		opt.CodecType = DefaultOption.CodecType
+	}
+	return opt, nil
+}
+
+// Dial connects to an RPC server at the specified network address
+func Dial(network, address string, opts ...*Option) (client *Client, err error) {
+	opt, err := parseOptions(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err := net.Dial(network, address)
+	if err != nil {
+		return nil, err
+	}
+
+	// close the connection if client is nil
+	defer func(){ 
+		if client == nil {
+			_ = conn.Close()
+		}
+	}()
+
+	return NewClient(conn, opt)
+}
