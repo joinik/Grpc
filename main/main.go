@@ -2,6 +2,7 @@ package main
 
 import (
 	"Grpc"
+	"Grpc/service"
 	"fmt"
 	"log"
 	"net"
@@ -17,7 +18,7 @@ func startServer(addr chan string) {
 	}
 	log.Println("start rpc server on", l.Addr())
 	addr <- l.Addr().String()
-	Grpc.Accept(l)
+	service.Accept(l)
 }
 
 func main() {

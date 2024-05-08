@@ -1,4 +1,4 @@
-package Grpc
+package service
 
 import (
 	"Grpc/codec"
@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"reflect"
+	"strings"
 	"sync"
 )
 
@@ -40,6 +41,29 @@ func (server *Server) Register(rcvr interface{}) error {
 
 // Register publishes the receiver's methods in the DefaultServer.
 func Register(rcvr interface{}) error { return DefaultServer.Register(rcvr) }
+
+func (server *Server) findService(serviceMethod string) (svc *service,
+	mtype *methodType, err error) {
+	dot := strings.LastIndex(serviceMethod, ".")
+	if dot < 0 {
+		err = errors.New("rpc server: service/method request ill-formed: " + serviceMethod)
+		return
+	}
+	serviceName, methodName := serviceMethod[:dot], serviceMethod[dot+1:]
+	svci, ok := server.serviceMap.Load(serviceName)
+	if !ok {
+		err = errors.New("rpc server: can't find service " + serviceName)
+		return
+	}
+
+	svc = svci.(*service)
+	mtype = svc.method[methodName]
+	if mtype == nil {
+		err = errors.New("rpc server: can't find method " + methodName)
+	}
+	return 
+
+}
 
 // NewServer return a new Server
 func NewServer() *Server {

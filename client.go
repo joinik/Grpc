@@ -2,6 +2,7 @@ package Grpc
 
 import (
 	"Grpc/codec"
+	"Grpc/service"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,7 +36,7 @@ func (call *Call) done() {
 */
 type Client struct {
 	cc       codec.Codec
-	opt      *Option
+	opt      *service.Option
 	sending  sync.Mutex
 	header   codec.Header // protect following
 	mu       sync.Mutex   // protect following
@@ -138,7 +139,7 @@ func (client *Client) receive() {
 	client.terminateCalls(err)
 }
 
-func NewClient(conn net.Conn, opt *Option) (*Client, error) {
+func NewClient(conn net.Conn, opt *service.Option) (*Client, error) {
 	f := codec.NewCodecMap[opt.CodecType]
 	if f == nil {
 		err := fmt.Errorf("invalid codec type %s", opt.CodecType)
@@ -154,7 +155,7 @@ func NewClient(conn net.Conn, opt *Option) (*Client, error) {
 	return NewClientCodec(f(conn), opt), nil
 }
 
-func NewClientCodec(cc codec.Codec, opt *Option) *Client {
+func NewClientCodec(cc codec.Codec, opt *service.Option) *Client {
 	client := &Client{
 		seq:     1, // seq starts with 1, 0 means call
 		cc:      cc,
@@ -165,25 +166,25 @@ func NewClientCodec(cc codec.Codec, opt *Option) *Client {
 	return client
 }
 
-func parseOptions(opts ...*Option) (*Option, error) {
+func parseOptions(opts ...*service.Option) (*service.Option, error) {
 	// if opts is nil or pass nil as parameter
 	if len(opts) == 0 || opts[0] == nil {
-		return DefaultOption, nil
+		return service.DefaultOption, nil
 	}
 
 	if len(opts) != 1 {
 		return nil, errors.New("number of options is more than 1")
 	}
 	opt := opts[0]
-	opt.MagicNumber = DefaultOption.MagicNumber
+	opt.MagicNumber = service.DefaultOption.MagicNumber
 	if opt.CodecType == "" {
-		opt.CodecType = DefaultOption.CodecType
+		opt.CodecType = service.DefaultOption.CodecType
 	}
 	return opt, nil
 }
 
 // Dial connects to an RPC server at the specified network address
-func Dial(network, address string, opts ...*Option) (client *Client, err error) {
+func Dial(network, address string, opts ...*service.Option) (client *Client, err error) {
 	opt, err := parseOptions(opts...)
 	if err != nil {
 		return nil, err
