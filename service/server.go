@@ -4,7 +4,6 @@ import (
 	"Grpc/codec"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -164,7 +163,7 @@ func (server *Server) readRequest(cc codec.Codec) (*request, error) {
 
 	req.svc, req.mtype, err = server.findService(h.ServiceMethod)
 	if err != nil {
-		return req, err 
+		return req, err
 	}
 
 	req.argv = req.mtype.newArgv()
@@ -192,10 +191,12 @@ func (server *Server) sendResponse(cc codec.Codec, h *codec.Header,
 }
 func (server *Server) handleRequest(cc codec.Codec, req *request,
 	sending *sync.Mutex, wg *sync.WaitGroup) {
-	// TODO, should call registered rpc methods to get the right replyv
-	// day 1, just print argv and send a hello message
 	defer wg.Done()
-	log.Println(req.h, req.argv.Elem())
-	req.replyv = reflect.ValueOf(fmt.Sprintf("Grpc resp %d", req.h.Seq))
+	err := req.svc.call(req.mtype, req.argv, req.replyv)
+	if err != nil {
+		req.h.Error = err.Error()
+		server.sendResponse(cc, req.h, invalidRequest, sending)
+		return
+	}
 	server.sendResponse(cc, req.h, req.replyv.Interface(), sending)
 }
