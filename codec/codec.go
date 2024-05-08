@@ -3,7 +3,7 @@ package codec
 import "io"
 
 type Header struct {
-	SericeMethod string //format "Service.Method"
+	ServiceMethod string //format "Service.Method"
 	Seq          uint64 //sequence number chosen by client
 	Error        string
 }

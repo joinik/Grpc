@@ -61,7 +61,7 @@ func (server *Server) findService(serviceMethod string) (svc *service,
 	if mtype == nil {
 		err = errors.New("rpc server: can't find method " + methodName)
 	}
-	return 
+	return
 
 }
 
@@ -139,6 +139,9 @@ func (server *Server) serveCodec(cc codec.Codec) {
 type request struct {
 	h            *codec.Header //header of request
 	argv, replyv reflect.Value //regv and replyv of request
+	// +++++++
+	mtype *methodType
+	svc   *service
 }
 
 func (server *Server) readRequestHeader(cc codec.Codec) (*codec.Header, error) {
@@ -158,10 +161,21 @@ func (server *Server) readRequest(cc codec.Codec) (*request, error) {
 		return nil, err
 	}
 	req := &request{h: h}
-	//TODO: now we don't know the type of request argv
-	// day 1, just suppose it's string
-	req.argv = reflect.New(reflect.TypeOf(""))
-	if err = cc.ReadBody(req.argv.Interface()); err != nil {
+
+	req.svc, req.mtype, err = server.findService(h.ServiceMethod)
+	if err != nil {
+		return req, err 
+	}
+
+	req.argv = req.mtype.newArgv()
+	req.replyv = req.mtype.newReplyv()
+
+	// make sure that argvi is a pointer, ReadBody need a pointer as parameter
+	argvi := req.argv.Interface()
+	if req.argv.Type().Kind() != reflect.Ptr {
+		argvi = req.argv.Addr().Interface()
+	}
+	if err = cc.ReadBody(argvi); err != nil {
 		log.Println("rpc server: read argv err:", err)
 	}
 	return req, nil

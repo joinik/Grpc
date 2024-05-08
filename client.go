@@ -219,7 +219,7 @@ func (client *Client) send(call *Call) {
 	}
 
 	// prepare request header
-	client.header.SericeMethod = call.ServiceMethod
+	client.header.ServiceMethod = call.ServiceMethod
 	client.header.Seq = seq
 	client.header.Error = ""
 
