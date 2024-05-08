@@ -3,6 +3,7 @@ package main
 import (
 	"Grpc"
 	"Grpc/service"
+	"context"
 	"log"
 	"net"
 	"sync"
@@ -51,8 +52,9 @@ func main() {
 		go func(i int) {
 			defer wg.Done()
 			args := &Args{Num1: i, Num2: i * i}
+			ctx, _ := context.WithTimeout(context.Background(), time.Second)
 			var reply int
-			if err := client.Call("Foo.Sum", args, &reply); err != nil {
+			if err := client.Call(ctx, "Foo.Sum", args, &reply); err != nil {
 				log.Fatal("call Foo.Sum error", err)
 			}
 			log.Println("reply:", reply)
