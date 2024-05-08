@@ -21,30 +21,30 @@
 // 	service.Accept(l)
 // }
 
-// // func main() {
-// // 	log.SetFlags(0)
-// // 	addr := make(chan string)
-// // 	go startServer(addr)
+// func main() {
+// 	log.SetFlags(0)
+// 	addr := make(chan string)
+// 	go startServer(addr)
 
-// // 	client, _ := Grpc.Dial("tcp", <-addr)
-// // 	defer func() { _ = client.Close() }()
+// 	client, _ := Grpc.Dial("tcp", <-addr)
+// 	defer func() { _ = client.Close() }()
 
-// // 	time.Sleep(time.Second)
-// // 	// send request & reveive response
-// // 	var wg sync.WaitGroup
+// 	time.Sleep(time.Second)
+// 	// send request & reveive response
+// 	var wg sync.WaitGroup
 
-// // 	// send request & receive response
-// // 	for i := 0; i < 5; i++ {
-// // 		wg.Add(1)
-// // 		go func(i int) {
-// // 			defer wg.Done()
-// // 			args := fmt.Sprintf("Grpc req %d", i)
-// // 			var reply string
-// // 			if err := client.Call("Foo.Sum", args, &reply); err != nil {
-// // 				log.Fatal("call Foo.Sum error", err)
-// // 			}
-// // 			log.Println("reply:", reply)
-// // 		}(i)
-// // 		wg.Wait()
-// // 	}
-// // }
+// 	// send request & receive response
+// 	for i := 0; i < 5; i++ {
+// 		wg.Add(1)
+// 		go func(i int) {
+// 			defer wg.Done()
+// 			args := fmt.Sprintf("Grpc req %d", i)
+// 			var reply string
+// 			if err := client.Call("Foo.Sum", args, &reply); err != nil {
+// 				log.Fatal("call Foo.Sum error", err)
+// 			}
+// 			log.Println("reply:", reply)
+// 		}(i)
+// 		wg.Wait()
+// 	}
+// }
