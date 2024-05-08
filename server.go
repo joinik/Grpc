@@ -3,6 +3,7 @@ package Grpc
 import (
 	"Grpc/codec"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -25,7 +26,20 @@ var DefaultOption = &Option{
 
 // Server represents an RPC Server
 type Server struct {
+	serviceMap sync.Map //原子化map
 }
+
+// Register publishes in the server the set of methods of the
+func (server *Server) Register(rcvr interface{}) error {
+	s := newService(rcvr)
+	if _, dup := server.serviceMap.LoadOrStore(s.name, s); dup {
+		return errors.New("rpc service already defined: " + s.name)
+	}
+	return nil
+}
+
+// Register publishes the receiver's methods in the DefaultServer.
+func Register(rcvr interface{}) error { return DefaultServer.Register(rcvr) }
 
 // NewServer return a new Server
 func NewServer() *Server {
