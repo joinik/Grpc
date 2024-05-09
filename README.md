@@ -84,4 +84,16 @@ func (t *T) MethodName(argType T1, replyType *T2) error
 - 读取客户端请求报文时，读报文导致的超时
 - 发送响应报文时，写报文导致的超时
 - 调用映射服务的方法时，处理报文导致的超时
--
+
+
+## day5支持HTTP协议
+
+通信过程
+
+1。客户端向RPC服务器发送CONNECT请求
+
+`CONNECT 10.0.0.1:9999/_Grpc_ HTTP/1.0`
+
+2。RPC服务器返回HTTP 200 状态码表示连接建立。
+
+`HTTP/1.0 200 Connected to Grpc `
