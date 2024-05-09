@@ -35,8 +35,6 @@ type Server struct {
 	serviceMap sync.Map //原子化map
 }
 
-
-
 // Register publishes in the server the set of methods of the
 func (server *Server) Register(rcvr interface{}) error {
 	s := newService(rcvr)
@@ -230,9 +228,9 @@ func (server *Server) handleRequest(cc codec.Codec, req *request,
 }
 
 const (
-	connected        = "200 Connected to Gee RPC"
-	defaultRPCPath   = "/_Grpc_"
-	defaultDebugPath = "/debug/Grpc"
+	Connected        = "200 Connected to Gee RPC"
+	DefaultRPCPath   = "/_Grpc_"
+	DefaultDebugPath = "/debug/Grpc"
 )
 
 // ServeHTTP implements an http.Handler that answers RPC requests.
@@ -248,17 +246,17 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		log.Print("rpc hijacking ", req.RemoteAddr, ": ", err.Error())
 		return
 	}
-	_, _ = io.WriteString(conn, "HTTP/1.0 "+connected+"\n\n")
+	_, _ = io.WriteString(conn, "HTTP/1.0 "+Connected+"\n\n")
 	server.ServerConn(conn)
 }
 
 // HandleHTTP registers an HTTP handler for RPC messages on rpcPath.
 // It is still necessary to invoke http.Serve(), typically in a go statement.
 func (server *Server) HandleHTTP() {
-	http.Handle(defaultDebugPath, server)
+	http.Handle(DefaultDebugPath, server)
 }
 
 // HandleHTTP is a convenient approach for default server to register HTTP handlers
-func HandleHTTP()  {
+func HandleHTTP() {
 	DefaultServer.HandleHTTP()
 }
