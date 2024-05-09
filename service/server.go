@@ -133,7 +133,7 @@ func (server *Server) serveCodec(cc codec.Codec) {
 			continue
 		}
 		wg.Add(1)
-		go server.handleRequest(cc, req, sending, wg)
+		go server.handleRequest(cc, req, sending, wg, DefaultOption.ConnectTimeout)
 	}
 	wg.Wait()
 	_ = cc.Close()
@@ -215,7 +215,7 @@ func (server *Server) handleRequest(cc codec.Codec, req *request,
 	if timeout == 0 {
 		<-called
 		<-sent
-		return 
+		return
 	}
 	select {
 	case <-time.After(timeout):
