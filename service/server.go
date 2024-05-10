@@ -47,8 +47,8 @@ func (server *Server) Register(rcvr interface{}) error {
 // Register publishes the receiver's methods in the DefaultServer.
 func Register(rcvr interface{}) error { return DefaultServer.Register(rcvr) }
 
-func (server *Server) findService(serviceMethod string) (svc *service,
-	mtype *methodType, err error) {
+func (server *Server) findService(serviceMethod string) (svc *Service,
+	mtype *MethodType, err error) {
 	dot := strings.LastIndex(serviceMethod, ".")
 	if dot < 0 {
 		err = errors.New("rpc server: service/method request ill-formed: " + serviceMethod)
@@ -61,7 +61,7 @@ func (server *Server) findService(serviceMethod string) (svc *service,
 		return
 	}
 
-	svc = svci.(*service)
+	svc = svci.(*Service)
 	mtype = svc.method[methodName]
 	if mtype == nil {
 		err = errors.New("rpc server: can't find method " + methodName)
@@ -145,8 +145,8 @@ type request struct {
 	h            *codec.Header //header of request
 	argv, replyv reflect.Value //regv and replyv of request
 	// +++++++
-	mtype *methodType
-	svc   *service
+	mtype *MethodType
+	svc   *Service
 }
 
 func (server *Server) readRequestHeader(cc codec.Codec) (*codec.Header, error) {
