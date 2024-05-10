@@ -32,13 +32,13 @@ var DefaultOption = &Option{
 
 // Server represents an RPC Server
 type Server struct {
-	serviceMap sync.Map //原子化map
+	ServiceMap sync.Map //原子化map
 }
 
 // Register publishes in the server the set of methods of the
 func (server *Server) Register(rcvr interface{}) error {
 	s := newService(rcvr)
-	if _, dup := server.serviceMap.LoadOrStore(s.name, s); dup {
+	if _, dup := server.ServiceMap.LoadOrStore(s.name, s); dup {
 		return errors.New("rpc service already defined: " + s.name)
 	}
 	return nil
@@ -55,7 +55,7 @@ func (server *Server) findService(serviceMethod string) (svc *service,
 		return
 	}
 	serviceName, methodName := serviceMethod[:dot], serviceMethod[dot+1:]
-	svci, ok := server.serviceMap.Load(serviceName)
+	svci, ok := server.ServiceMap.Load(serviceName)
 	if !ok {
 		err = errors.New("rpc server: can't find service " + serviceName)
 		return
