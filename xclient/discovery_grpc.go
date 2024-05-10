@@ -58,3 +58,17 @@ func (d *GrpcRegistryDiscovery) Refresh() error {
 	d.lastUpdate = time.Now()
 	return nil
 }
+
+func (d *GrpcRegistryDiscovery) GetAll() ([]string, error) {
+	if err := d.Refresh(); err != nil {
+		return nil, err
+	}
+	return d.MultiServersDiscovery.GetAll()
+}
+func (d *GrpcRegistryDiscovery) Get(mode SelectMode) (string, error) {
+	if err := d.Refresh(); err != nil {
+		return "", err
+	}
+	return d.MultiServersDiscovery.Get(mode)
+}
+
