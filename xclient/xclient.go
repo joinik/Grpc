@@ -89,6 +89,7 @@ func (xc *XClient) Broadcast(ctx context.Context, serviceMethod string, args, re
 
 	replyDone := reply == nil // if reply is nil, don't need to set value
 	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	for _, rpcAddr := range servers {
 		wg.Add(1)
 		go func(rpcAddr string) {
