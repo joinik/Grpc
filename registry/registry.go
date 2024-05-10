@@ -1,7 +1,10 @@
 package registry
 
 import (
+	"log"
+	"net/http"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -60,4 +63,33 @@ func (r *GrpcRegistry) aliveServers() []string {
 	}
 	sort.Strings(alive)
 	return alive
+}
+
+// Runs at /_Grpc_/registry
+func (r *GrpcRegistry) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		// keep it simple, server is in req.Header
+		w.Header().Set("X-Grpc-Servers", strings.Join(r.aliveServers(), ","))
+	case "POST":
+		// keep it simple, server is in req.Header
+		addr := req.Header.Get("X-Grpc-Server")
+		if addr == "" {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		r.putServer(addr)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+// HandleHTTP registers an HTTP handler for GrpcRegistry message on registryPath
+func (r *GrpcRegistry) HandleHTTP(registryPath string) {
+	http.Handle(registryPath, r)
+	log.Println("rpc registry path: ", registryPath)
+}
+
+func HandleHTTP() {
+	DefaultGrpcRegister.HandleHTTP(defaultPath)
 }
